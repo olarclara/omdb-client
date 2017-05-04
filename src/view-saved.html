@@ -1,0 +1,103 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="saved-movie.html">
+<link rel="import" href="redux-store.html">
+
+<dom-module id="view-saved">
+  <template>
+    <style>
+      .u-wrapper { display: grid; }
+
+      @media screen and (min-width: 960px) {
+        .u-wrapper { grid-template-columns: 25% 25% 25% 25%; }
+      }
+
+      @media screen and (min-width: 1280px) {
+        .u-wrapper { grid-template-columns: 20% 20% 20% 20% 20%; }
+      }
+    </style>
+
+    <template is="dom-if" if="{{_isMovies(movies)}}" restamp="true">
+      <label for="orderByMenu">Order By</label>
+      <select name="orderByMenu" id="orderByMenu" value="{{orderBy::change}}">
+        <option>-</option>
+        <option value="1">Newest</option>
+        <option value="2">Oldest</option>
+        <option value="3">Best rated</option>
+      </select>
+
+      <label for="filterByGenre">Filter by Genre:</label>
+      <input type="text" name="filterByGenre" id="filterByGenre" value="{{genre::change}}">
+    </template>
+
+    <div class="u-wrapper">
+      <template is="dom-repeat" items="{{movies}}" id="moviesList" filter="_filterByGenre">
+        <saved-movie movie="{{item}}"></saved-movie>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'view-saved',
+      behaviors: [ ReduxBehavior ],
+      properties: {
+        movies: {
+          type: Array,
+          statePath: 'movies'
+        },
+        orderBy: {
+          type: Number,
+          observer: '_observeOrderBy'
+        },
+        genre: {
+          type: String,
+          observer: '_observeGenreFilter',
+          value: ''
+        }
+      },
+      _isMovies: function(movies) {
+        if (movies.length > 1) return true;
+      },
+      _observeOrderBy: function(orderBy) {
+        switch (orderBy) {
+          case '1':
+            this._orderByNewest();
+            break;
+          case '2':
+            this._orderByOldest();
+            break;
+          case '3':
+            this._orderByBestRated();
+            break;
+        }
+      },
+      _observeGenreFilter: function(genre) {
+        this.$.moviesList.render();
+      },
+      _orderByNewest: function() {
+        this.movies.sort(function(a, b) {
+          if (a.Year < b.Year) return 1;
+        });
+        this.$.moviesList.render();
+      },
+      _orderByOldest: function() {
+        this.movies.sort(function(a, b) {
+          if (a.Year > b.Year) return 1;
+        });
+        this.$.moviesList.render();
+      },
+      _orderByBestRated: function() {
+        this.movies.sort(function(a, b) {
+          if (a.imdbRating < b.imdbRating) return 1;
+        });
+        this.$.moviesList.render();
+      },
+      _filterByGenre: function(item) {
+        if (!this.genre) return item;
+        return (this.genre && item.Genre.match(new RegExp(this.genre, 'i')));
+      }
+
+    });
+  </script>
+</dom-module>

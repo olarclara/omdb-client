@@ -1,0 +1,27 @@
+<link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+
+<script>
+	var list = new Array();
+
+	for (let i = 0; i < localStorage.length; i++) {
+		let key = localStorage.key(i);
+		list.push(JSON.parse(localStorage.getItem(key)));
+	}
+
+
+	const initialState = { movies: list };
+	const reducer = (state, action) => {
+		if (!state) return initialState;
+
+		switch (action.type) {
+			case 'ADD_MOVIE':
+				let movies = state.movies.slice(0);
+				localStorage.setItem(action.movie.imdbID, JSON.stringify(action.movie));
+				movies.push(action.movie);
+				return Object.assign({}, state, { movies: movies });
+		}
+	};
+
+	const store = Redux.createStore(reducer);
+	const ReduxBehavior = PolymerRedux(store);
+</script>

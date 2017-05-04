@@ -1,0 +1,82 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
+
+<dom-module id="my-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+        --app-primary-color: #00796B;
+        --app-secondary-color: #FF5722;
+        --text-primary-color: #212121;
+        --text-secondary-color: #757575;
+      }
+      a, a:visited {
+        font-size: 150%;
+        height: initial !important;
+        text-decoration: none;
+        color: white;
+      }
+      paper-tabs {
+        background: var(--app-primary-color);
+        text-align: center;
+      }
+    </style>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <paper-tabs selected="[[page]]" attr-for-selected="name" role="navigation">
+      <paper-tab link>
+    	   <a name="search" href="/search">SEARCH</a>
+    	</paper-tab>
+    	<paper-tab link>
+    	   <a name="saved" href="/saved">SAVED</a>
+    	</paper-tab>
+    </paper-tabs>
+
+    <iron-pages selected="[[page]]"
+      attr-for-selected="name"
+      fallback-selection="404"
+      role="main">
+      <view-search name="search"></view-search>
+      <view-saved name="saved"></view-saved>
+      <view-404 name="404"></view-404>
+    </iron-pages>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'my-app',
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_pageChanged',
+        },
+      },
+      observers: [
+        '_routePageChanged(routeData.page)',
+      ],
+      _routePageChanged: function(page) {
+        this.page = page || 'search';
+      },
+      _pageChanged: function(page) {
+        var resolvedPageUrl = this.resolveUrl('view-' + page + '.html');
+        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+      _showPage404: function() {
+        this.page = '404';
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,72 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="redux-store.html">
+
+<dom-module id="search-details">
+	<template>
+		<style>
+			.u-wrapper {
+				display: grid;
+				grid-template-columns: 30% 70%;
+			}
+			img { width: 213px; height: 302px; }
+			.c-details { margin-left: 10px; }
+			.c-details h2 {
+				-webkit-margin-before: 0;
+				-webkit-margin-after: 0;
+			}
+			.c-details .buttons { margin-top: 10%; }
+			.c-details .buttons paper-button {
+				font-weight: bold;
+				color: white;
+			}
+			.c-details .buttons .btn-dismiss { background: #37474F; }
+			.c-details .buttons .btn-save { background: var(--app-primary-color); }
+		</style>
+
+		<div class="u-wrapper">
+			<div>
+				<img src$="[[movie.Poster]]">
+			</div>
+			<div class="c-details">
+				<h2>[[movie.Title]]</h2>
+				<small>[[movie.Year]]</small> - <small>[[movie.Genre]]</small>
+				<p>[[movie.Plot]]</p>
+				<p>Starring: [[movie.Actors]]</p>
+				<p>Director: [[movie.Director]]</p>
+				<template is="dom-repeat" items="[[movie.Ratings]]">
+					<small>[[item.Source]]: [[item.Value]]</small>
+				</template>
+				<div class="buttons">
+					<paper-button class="btn-dismiss" dialog-dismiss raised>CLOSE</paper-button>
+					<paper-button class="btn-save" dialog-confirm raised on-click="_saveMovie" id="[[movie.imdbID]]">SAVE</paper-button>
+				</div>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: 'search-details',
+			behaviors: [ ReduxBehavior ],
+			properties: {
+				movieDetails: {
+					type: Object,
+					notify: true,
+					reflectToAttribute: true
+				}
+			},
+			actions: {
+				add: function(movie) {
+					return {
+						type: 'ADD_MOVIE',
+						movie: movie
+					}
+				}
+			},
+			_saveMovie: function(e) {
+				const movie = this.movie;
+				if (movie) this.dispatch('add', movie);
+			}
+		});
+	</script>
+</dom-module>

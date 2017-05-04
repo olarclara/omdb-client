@@ -1,0 +1,113 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="list-search.html">
+<link rel="import" href="redux-store.html">
+
+<dom-module id="view-search">
+  <template>
+    <style>
+      :host {
+        box-sizing: border-box;
+        padding: 5px;
+      }
+      paper-input {
+        width: 35%;
+        --paper-input-container-focus-color: var(--app-primary-color);
+      }
+      paper-button {
+        text-align: center;
+        background: var(--app-primary-color);
+        color: white;
+        font-weight: bold;
+      }
+      paper-input, paper-button.btn-search { display: inline-block; }
+      .u-center { text-align: center; }
+			paper-button.btn-pagination { min-width: 2em; margin-bottom: 5px; }
+    </style>
+
+    <paper-input value="{{title}}" label="Search movies, tv shows and more..."></paper-input>
+		<paper-button class="btn-search" raised on-click="_doSearch">GO</paper-button>
+
+    <iron-ajax id="searchGeneral"
+		  url="http://www.omdbapi.com/?"
+		  handle-as="json"
+		  on-response="_handleGeneralResponse"></iron-ajax>
+
+    <br>
+  	<list-search movies="[[searchResult]]"></list-search>
+
+    <br>
+  	<div class="u-center">
+  		<template is="dom-repeat" items="[[pagination]]">
+  			<paper-button class="btn-pagination" id="[[_manipIndex(index)]]" on-click="_changePage" raised>[[_manipIndex(index)]]</paper-button>
+  		</template>
+  	</div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'view-search',
+      properties: {
+        title: {
+          type: String,
+          notify: true
+        },
+        page: {
+          type: Number,
+          notify: true,
+          value: 1
+        },
+        searchResult: {
+          type: Object,
+          reflectToAttribute: true
+        }
+      },
+      behaviors: [ ReduxBehavior ],
+      actions: {
+        add: function(movie) {
+          return {
+            type: 'ADD_MOVIE',
+            movie: movie
+          }
+        }
+      },
+      addMovie: function() {
+        const input = this.$.field;
+        if (input.value) {
+          this.dispatch('add', input.value);
+          input.value = '';
+          input.focus();
+        }
+      },
+      _manipIndex: function(index) { return index+1; },
+      _doSearch: function() {
+        this._searchGeneral(1);
+      },
+      _changePage: function(e) {
+        this.page = e.target.id;
+        this._searchGeneral(this.page);
+      },
+      _searchGeneral(page) {
+        this.$.searchGeneral.params = {
+					s: this.title,
+					page: page
+				};
+
+				this.$.searchGeneral.generateRequest();
+      },
+      _handleGeneralResponse: function(data) {
+				this.searchResult = data.detail.response.Search;
+
+				if (data.detail.response.totalResults > 10) {
+					this.pagination = new Array(Math.ceil(data.detail.response.totalResults / 10));
+				} else this.pagination = new Array(1);
+			}
+    });
+  </script>
+</dom-module>

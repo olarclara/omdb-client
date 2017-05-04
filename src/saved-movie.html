@@ -1,0 +1,53 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-badge/paper-badge.html">
+
+<dom-module id="saved-movie">
+	<template>
+		<style>
+			.c-movie {
+				background: white;
+				margin: 20px;
+				padding: 13px;
+				text-align: center;
+				border-radius: 5px;
+			}
+			paper-badge {
+				--paper-badge-background: var(--app-secondary-color);
+			}
+			.c-movie img { width: 213px; height: 302px; }
+			.c-movie__text { text-align: left; color: var(--text-primary-color); }
+			.c-movie__text h3, h4 { -webkit-margin-before: 0; -webkit-margin-after: 0; }
+			small { color: var(--text-secondary-color); }
+		</style>
+
+		<div class="c-movie">
+			<paper-badge label="[[movie.imdbRating]]"></paper-badge>
+			<img src$="[[_isImage(movie.Poster)]]" alt="image poster">
+			<div class="c-movie__text">
+				<h3>[[movie.Title]]</h3>
+				<small>[[movie.Genre]]</small>
+				<h4>[[movie.Year]]</h4>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: 'saved-movie',
+			properties: {
+				movie: {
+					type: Object,
+					notify: true,
+					reflectToAttribute: true
+				}
+			},
+			_isImage: function(image) {
+				if (image !== 'N/A') {
+					return image;
+				}
+				else {
+					return 'http://www.bookmysports.com/angular/assets/images/no_image.jpg';
+				}
+			}
+		});
+	</script>
+</dom-module>
